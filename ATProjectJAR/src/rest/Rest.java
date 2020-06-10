@@ -8,12 +8,14 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import model.AID;
+import model.Agent;
 import model.AgentType;
 import model.AgentskiCentar;
 import model.Data;
@@ -25,7 +27,7 @@ import model.Performative;
 public class Rest {
 	@EJB
 	Data database;
-	
+
 	// GET/messages – dobavi listu performativa
 	@GET
 	@Path("/messages")
@@ -37,14 +39,16 @@ public class Rest {
 		}
 		return temp;
 	}
+
 	// GET /agents/classes – dobavi listu svih tipova agenata na sistemu
 	@GET
 	@Path("/agents/classes")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<AgentType> getTipovi() {
-		System.out.println("TIPOVI---"+database.getTypes());
+		System.out.println("TIPOVI---" + database.getTypes());
 		return database.getTypes();
 	}
+
 	// GET /agents/running – dobavi sve pokrenute agente sa sistema
 	@GET
 	@Path("/agents/running")
@@ -52,22 +56,31 @@ public class Rest {
 	public ArrayList<IAgent> getAgents() {
 		return new ArrayList<>(database.getAgents().values());
 	}
-	//DELETE /agents/running/{aid} – zaustavi odredjenog agenta
+
+	// DELETE /agents/running/{aid} – zaustavi odredjenog agenta
 	@DELETE
 	@Path("/agents/running/{aid}")
 	public void stopAgent(@PathParam("aid") String aid) {
-			
-		HashMap<AID, IAgent> agenti =database.getAgents(); 
-		for(AID a : agenti.keySet()) {
-			if(a.getName().equals(aid)) {
+
+		HashMap<AID, IAgent> agenti = database.getAgents();
+		for (AID a : agenti.keySet()) {
+			if (a.getName().equals(aid)) {
 				database.getAgents().remove(a);
 				break;
 			}
-		}		
-			 
+		}
+
+	}
+	
+	// PUT /agents/running/{type}/{name} – pokreni agenta odredenog tipa sa zadatim imenom;
+	@PUT
+	@Path("/agents/running/{type}/{name}")
+	public void startAgent(@PathParam("type") String type, @PathParam("name") String name) {
+		AgentskiCentar host = new AgentskiCentar("localhost", "8080");
+		
+		AID aid = new AID(name, host, new AgentType(type,null));
+		database.getAgents().put(aid, new Agent(aid));
 	}
 
-	
-	
-	
+
 }

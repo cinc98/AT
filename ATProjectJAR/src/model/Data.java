@@ -16,7 +16,7 @@ public class Data {
 	private WSEndPoint ws;
 	
 	private static ArrayList<AgentType> types = new ArrayList<>();
-	
+	private ArrayList<AgentskiCentar> agentskiCentri = new ArrayList<>();
 	private static HashMap<AID, IAgent> agents = new HashMap<>();
 	
 	static{
@@ -30,6 +30,15 @@ public class Data {
 		a1.setName("prvi");
 		agents.put(a1,new Agent(new AID("A",null,null)));
 		agents.put(new AID(), new Agent(new AID("B",null,null)));
+	}
+	
+
+	public ArrayList<AgentskiCentar> getAgentskiCentri() {
+		return agentskiCentri;
+	}
+
+	public void setAgentskiCentri(ArrayList<AgentskiCentar> agentskiCentri) {
+		this.agentskiCentri = agentskiCentri;
 	}
 
 	public ArrayList<AgentType> getTypes() {

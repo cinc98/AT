@@ -12,9 +12,6 @@ import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ws.rs.Path;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -73,14 +70,15 @@ public class Node {
 		String[] split2 = currentIp.split("/n");
 		currentIp=split2[0];
 		System.out.println("CurrentIP : " + currentIp);
-		notifyMaster(currentIp);
+		//if(currentIp!=masterIp)
+			//notifyMaster(currentIp);
 		
 	}
 	public void notifyMaster(String connection) {
 		//– nov ne-master cvor kontaktira master cvor koji ga registruje
 		ResteasyClient client = new ResteasyClientBuilder().build();
 		AgentskiCentar a = new AgentskiCentar("8080",connection);
-		ResteasyWebTarget rtarget = client.target("http://localhost:8080/ATProjectWAR/rest/node/register");
+		ResteasyWebTarget rtarget = client.target("http://"+masterIp+":8080/ATProjectWAR/rest/node/register");
 		//Response response = rtarget.request(MediaType.APPLICATION_JSON).post(Entity.entity(a, MediaType.APPLICATION_JSON));
 		
 		

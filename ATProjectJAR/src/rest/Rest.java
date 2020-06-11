@@ -26,6 +26,7 @@ import model.AgentskiCentar;
 import model.Data;
 import model.IAgent;
 import model.Performative;
+import model.Spyder;
 import ws.WSEndPoint;
 
 @LocalBean
@@ -36,6 +37,19 @@ public class Rest {
 
 	@EJB
 	WSEndPoint ws;
+	
+	@GET
+	@Path("/search/{brand}/{priceFrom}/{priceTo}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ArrayList<String> search(@PathParam(value = "brand") String brand, @PathParam(value = "priceFrom") String p1,
+			@PathParam(value = "priceTo") String p2) {
+		Spyder spider = new Spyder();
+		String url = "https://www.polovniautomobili.com/auto-oglasi/pretraga?brand="+brand+"&price_from="+p1+"&price_to="+p2;
+		System.out.println(url);
+		List<String> prices = new ArrayList<String>();
+		prices = spider.search(url, "audi");
+		return (ArrayList<String>) prices;
+	}
 
 	// GET/messages – dobavi listu performativa
 	@GET

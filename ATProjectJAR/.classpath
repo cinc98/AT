@@ -15,5 +15,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="/ATProjectEAR/EarContent/lib/jackson-core-asl-1.9.13.jar"/>
 	<classpathentry kind="lib" path="/ATProjectEAR/EarContent/lib/jackson-mapper-asl-1.9.13.jar"/>
+	<classpathentry kind="lib" path="/ATProjectEAR/EarContent/lib/jsoup-1.13.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

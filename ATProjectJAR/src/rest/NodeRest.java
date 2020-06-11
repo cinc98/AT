@@ -47,7 +47,9 @@ public class NodeRest {
 		database.getAgentskiCentri().add(a);
 		
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget = client.target("http://" + a.getAddress() + ":8080/ATProjectWAR/rest/node/host/nodes");
+		ResteasyWebTarget rtarget = client.target("http://06705c057400.ngrok.io/ATProjectWAR/rest/node/host/nodes");
+		
+
 		Response response = rtarget.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgentskiCentri(),MediaType.APPLICATION_JSON));
 		
 		for(AgentskiCentar at : database.getAgentskiCentri()) {
@@ -58,7 +60,7 @@ public class NodeRest {
 			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).post(Entity.entity(a,MediaType.APPLICATION_JSON));
 		}
 		ResteasyClient client3 = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget3 = client3.target("http://" + a.getAddress() + ":8080/ATProjectWAR/rest/node/agents/classes");
+		ResteasyWebTarget rtarget3 = client3.target("http://06705c057400.ngrok.io/ATProjectWAR/rest/node/agents/classes");
 		Response response3 = rtarget3.request(MediaType.APPLICATION_JSON).get();		
 		List<AgentType> list =  response3.readEntity(ArrayList.class);
 		System.out.println("Primio sam nove tipove" + list);
@@ -73,9 +75,9 @@ public class NodeRest {
 		int num = 1;
 		while(num !=3) {
 		ResteasyClient client5 = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget5 = client5.target("http://" + a.getAddress() + ":8080/ATProjectWAR/rest/node/agents/running");
+		ResteasyWebTarget rtarget5 = client5.target("http://06705c057400.ngrok.io/ATProjectWAR/rest/node/agents/running");
 		Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgentskiCentri(),MediaType.APPLICATION_JSON));
-			if(Response.Status.OK.ordinal()==response3.getStatus()) {
+			if(Response.Status.OK.ordinal()==response5.getStatus()) {
 				break;
 			}
 		}
@@ -135,10 +137,10 @@ public class NodeRest {
 	@POST
 	@Path("/agents/running")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void loggedIn(HashMap<String, Agent> runningAgents) {
+	public Response loggedIn(HashMap<String, Agent> runningAgents) {
 		System.out.println("Sada sam u novom ne-masteru i dobijam spisak pokrenutih agenata");
 		database.setAgents(runningAgents);
-		return;
+		return Response.status(200).build();
 	}
 	
 	@DELETE

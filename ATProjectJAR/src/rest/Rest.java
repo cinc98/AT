@@ -1,8 +1,9 @@
 package rest;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -23,8 +25,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-
-import com.sun.xml.internal.ws.client.sei.ResponseBuilder;
 
 import model.AID;
 import model.Agent;
@@ -128,6 +128,26 @@ public class Rest {
 			e.printStackTrace();
 		}
 		ws.echoTextMessage(msg);
+		String currentIp;
+		InetAddress ip = null ;
+        try {
+            ip = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        currentIp = ip.toString();
+	    String[] split = currentIp.split("/");
+	    currentIp=split[1];
+	    String[] split2 = currentIp.split("/n");
+	    currentIp=split2[0];
+	  //Ulogovao se novi , treba da se javi svim hostovima
+	    for(AgentskiCentar at : database.getAgentskiCentri()) {
+			if(at.getAddress().equals(currentIp))
+				continue;			
+			ResteasyClient client2 = new ResteasyClientBuilder().build();
+			ResteasyWebTarget rtarget2 = client2.target("http://7cbf1630576a.ngrok.io/ATProjectWAR/rest/node/host/node");
+			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).post(Entity.entity(host,MediaType.APPLICATION_JSON));
+		}
 	}
 
 }

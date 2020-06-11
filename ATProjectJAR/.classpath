@@ -13,5 +13,7 @@
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/ATProjectEAR/EarContent/lib/jackson-core-asl-1.9.13.jar"/>
+	<classpathentry kind="lib" path="/ATProjectEAR/EarContent/lib/jackson-mapper-asl-1.9.13.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

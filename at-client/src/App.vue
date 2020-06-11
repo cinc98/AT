@@ -1,12 +1,23 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-    </div>
+  <v-app>
+    <app-bar/>
     <router-view/>
-  </div>
+  </v-app>
 </template>
 
-<style>
+<script>
+import AppBar from './components/AppBar.vue';
 
+export default {
+  components:{
+    AppBar,
+  }
+  
+}
+</script>
+
+<style>
+html{
+    overflow: hidden !important;
+}
 </style>

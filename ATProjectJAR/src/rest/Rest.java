@@ -1,5 +1,6 @@
 package rest;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +15,10 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import model.AID;
 import model.Agent;
 import model.AgentType;
@@ -21,12 +26,16 @@ import model.AgentskiCentar;
 import model.Data;
 import model.IAgent;
 import model.Performative;
+import ws.WSEndPoint;
 
 @LocalBean
 @Path("")
 public class Rest {
 	@EJB
 	Data database;
+
+	@EJB
+	WSEndPoint ws;
 
 	// GET/messages – dobavi listu performativa
 	@GET
@@ -54,6 +63,7 @@ public class Rest {
 	@Path("/agents/running")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ArrayList<IAgent> getAgents() {
+
 		return new ArrayList<>(database.getAgents().values());
 	}
 
@@ -71,16 +81,32 @@ public class Rest {
 		}
 
 	}
-	
-	// PUT /agents/running/{type}/{name} – pokreni agenta odredenog tipa sa zadatim imenom;
+
+	// PUT /agents/running/{type}/{name} – pokreni agenta odredenog tipa sa zadatim
+	// imenom;
 	@PUT
 	@Path("/agents/running/{type}/{name}")
 	public void startAgent(@PathParam("type") String type, @PathParam("name") String name) {
 		AgentskiCentar host = new AgentskiCentar("localhost", "8080");
-		
-		AID aid = new AID(name, host, new AgentType(type,null));
-		database.getAgents().put(aid, new Agent(aid));
-	}
 
+		AID aid = new AID(name, host, new AgentType(type, null));
+		Agent agent = new Agent(aid);
+		database.getAgents().put(aid, agent);
+		ObjectMapper mapper = new ObjectMapper();
+		String msg=null;
+		try {
+			msg = mapper.writeValueAsString(agent);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		ws.echoTextMessage(msg);
+	}
 
 }

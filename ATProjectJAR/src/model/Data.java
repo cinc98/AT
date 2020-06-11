@@ -26,10 +26,10 @@ public class Data {
 		a.setModule("abc");
 		a.setName("test");
 		types.add(a);
-		AID a1 = new AID();
-		a1.setName("prvi");
-		agents.put(a1,new Agent(new AID("A",null,null)));
-		agents.put(new AID(), new Agent(new AID("B",null,null)));
+//		AID a1 = new AID();
+//		a1.setName("prvi");
+//		agents.put(a1,new Agent(new AID("A",null,null)));
+//		agents.put(new AID(), new Agent(new AID("B",null,null)));
 	}
 	
 

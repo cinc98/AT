@@ -7,6 +7,8 @@ import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
+
 import ws.WSEndPoint;
 
 @Startup
@@ -17,7 +19,7 @@ public class Data {
 	
 	private static ArrayList<AgentType> types = new ArrayList<>();
 	private ArrayList<AgentskiCentar> agentskiCentri = new ArrayList<>();
-	private static HashMap<AID, IAgent> agents = new HashMap<>();
+	private static HashMap<String, Agent> agents = new HashMap<>();
 	
 	static{
 		
@@ -50,11 +52,11 @@ public class Data {
 	}
 
 
-	public HashMap<AID, IAgent> getAgents() {
+	public HashMap<String, Agent> getAgents() {
 		return agents;
 	}
 
-	public void setAgents(HashMap<AID, IAgent> agenti) {
+	public void setAgents(HashMap<String, Agent> agenti) {
 		this.agents = agenti;
 	}
 	

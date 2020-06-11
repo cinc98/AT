@@ -24,6 +24,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import model.AID;
+import model.Agent;
 import model.AgentType;
 import model.AgentskiCentar;
 import model.Data;
@@ -132,9 +133,9 @@ public class NodeRest {
 		return;		
 	}
 	@POST
-	@Path("/agents/running ")
+	@Path("/agents/running")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void loggedIn(HashMap<AID, IAgent> runningAgents) {
+	public void loggedIn(HashMap<String, Agent> runningAgents) {
 		System.out.println("Sada sam u novom ne-masteru i dobijam spisak pokrenutih agenata");
 		database.setAgents(runningAgents);
 		return;

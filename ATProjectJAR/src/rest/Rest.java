@@ -93,9 +93,9 @@ public class Rest {
 	@Path("/agents/running/{aid}")
 	public void stopAgent(@PathParam("aid") String aid) {
 
-		HashMap<AID, IAgent> agenti = database.getAgents();
-		for (AID a : agenti.keySet()) {
-			if (a.getName().equals(aid)) {
+		HashMap<String, Agent> agenti = database.getAgents();
+		for (String a : agenti.keySet()) {
+			if (a.equals(aid)) {
 				database.getAgents().remove(a);
 				break;
 			}
@@ -112,7 +112,7 @@ public class Rest {
 
 		AID aid = new AID(name, host, new AgentType(type, null));
 		Agent agent = new Agent(aid);
-		database.getAgents().put(aid, agent);
+		database.getAgents().put(aid.getName(), agent);
 		ObjectMapper mapper = new ObjectMapper();
 		String msg=null;
 		try {

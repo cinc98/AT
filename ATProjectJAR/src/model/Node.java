@@ -7,16 +7,19 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ws.rs.Path;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
-
 
 @Singleton
 @Startup
@@ -25,64 +28,76 @@ public class Node {
 	private String currentIp;
 	private String masterIp = null;
 	
+	Runnable task = () -> {
+
+		try {
+			TimeUnit.SECONDS.sleep(3);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		notifyMaster(this.currentIp);
+
+	};
+
 	@PostConstruct
 	public void init() {
 		BufferedReader br = null;
 		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
-		System.out.println("path: "+p.toString());
+		System.out.println("path: " + p.toString());
 		String line = "";
 
-		   
 		try {
-			br = new BufferedReader(new FileReader(p.toString()+"\\config.txt"));
-			
-			 StringBuilder sb = new StringBuilder();
-			    while (line != null) {
-			        sb.append(line);
-			        sb.append(System.lineSeparator());
-			        try {
-						line = br.readLine();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-			    }
-			    masterIp = sb.toString();
+			br = new BufferedReader(new FileReader(p.toString() + "\\config.txt"));
+
+			StringBuilder sb = new StringBuilder();
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				try {
+					line = br.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			masterIp = sb.toString();
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
-   
-		masterIp = masterIp.substring(2, masterIp.length()-2);
+
+		masterIp = masterIp.substring(2, masterIp.length() - 2);
 		System.out.println("MasterIP : " + masterIp);
-		
-		InetAddress ip = null ;
-      
+
+		InetAddress ip = null;
+
 		try {
-		    ip = InetAddress.getLocalHost();
+			ip = InetAddress.getLocalHost();
 		} catch (UnknownHostException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		}
 		currentIp = ip.toString();
 		String[] split = currentIp.split("/");
-		currentIp=split[1];
+		currentIp = split[1];
 		String[] split2 = currentIp.split("/n");
-		currentIp=split2[0];
+		currentIp = split2[0];
 		System.out.println("CurrentIP : " + currentIp);
-		//if(currentIp!=masterIp)
-			//notifyMaster(currentIp);
-		
+		if (currentIp != masterIp) {
+			Thread thread = new Thread(task);
+			thread.start();
+		}
+
 	}
+
 	public void notifyMaster(String connection) {
-		//– nov ne-master cvor kontaktira master cvor koji ga registruje
+		// – nov ne-master cvor kontaktira master cvor koji ga registruje
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		AgentskiCentar a = new AgentskiCentar("8080",connection);
-		ResteasyWebTarget rtarget = client.target("http://"+masterIp+":8080/ATProjectWAR/rest/node/register");
-		//Response response = rtarget.request(MediaType.APPLICATION_JSON).post(Entity.entity(a, MediaType.APPLICATION_JSON));
-		
-		
-		
+		AgentskiCentar a = new AgentskiCentar("8080", connection);
+		ResteasyWebTarget rtarget = client.target(masterIp + "/ATProjectWAR/rest/node/register");
+		Response response = rtarget.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(a, MediaType.APPLICATION_JSON));
+		return;
+
 	}
 
 }

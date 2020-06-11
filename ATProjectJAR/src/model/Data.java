@@ -18,7 +18,7 @@ public class Data {
 	private WSEndPoint ws;
 	
 	private static ArrayList<AgentType> types = new ArrayList<>();
-	private ArrayList<AgentskiCentar> agentskiCentri = new ArrayList<>();
+	private static ArrayList<AgentskiCentar> agentskiCentri = new ArrayList<>();
 	private static HashMap<String, Agent> agents = new HashMap<>();
 	
 	static{
@@ -28,6 +28,7 @@ public class Data {
 		a.setModule("abc");
 		a.setName("test");
 		types.add(a);
+		
 //		AID a1 = new AID();
 //		a1.setName("prvi");
 //		agents.put(a1,new Agent(new AID("A",null,null)));

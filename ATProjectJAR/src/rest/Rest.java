@@ -108,6 +108,7 @@ public class Rest {
 	@PUT
 	@Path("/agents/running/{type}/{name}")
 	public void startAgent(@PathParam("type") String type, @PathParam("name") String name) {
+		System.out.println("Primam novi running cvor");
 		AgentskiCentar host = new AgentskiCentar("localhost", "8080");
 
 		AID aid = new AID(name, host, new AgentType(type, null));
@@ -145,8 +146,8 @@ public class Rest {
 			if(at.getAddress().equals(currentIp))
 				continue;			
 			ResteasyClient client2 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget rtarget2 = client2.target("http://7cbf1630576a.ngrok.io/ATProjectWAR/rest/node/host/node");
-			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).post(Entity.entity(host,MediaType.APPLICATION_JSON));
+			ResteasyWebTarget rtarget2 = client2.target("http://7cbf1630576a.ngrok.io/ATProjectWAR/rest/agents/running/"+type+"/"+name);
+			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).put(Entity.entity(host,MediaType.APPLICATION_JSON));
 		}
 	}
 

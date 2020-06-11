@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ws.rs.Path;
@@ -27,6 +28,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 public class Node {
 	private String currentIp;
 	private String masterIp = null;
+	@EJB
+	Data database;
 	
 	Runnable task = () -> {
 
@@ -82,9 +85,12 @@ public class Node {
 		String[] split2 = currentIp.split("/n");
 		currentIp = split2[0];
 		System.out.println("CurrentIP : " + currentIp);
-		if (currentIp != masterIp) {
+		currentIp  = masterIp;
+		if (!currentIp.equals( masterIp)) {
 			Thread thread = new Thread(task);
 			thread.start();
+		}else {
+			database.getAgentskiCentri().add(new AgentskiCentar("", "http://7cbf1630576a.ngrok.io"));
 		}
 
 	}

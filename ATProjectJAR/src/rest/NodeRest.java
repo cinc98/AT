@@ -24,6 +24,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -34,7 +37,7 @@ import model.AgentType;
 import model.AgentskiCentar;
 import model.Data;
 import model.IAgent;
-
+import ws.WSEndPoint;
 
 @Singleton
 @Startup
@@ -42,68 +45,74 @@ import model.IAgent;
 public class NodeRest {
 	private String currentIp;
 	private String masterIp = "http://b4507c2dd9c6.ngrok.io";
-	
+	@EJB
+	WSEndPoint ws;
 	@EJB
 	Data database;
-	
+
 	@POST
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void notifyMaster(AgentskiCentar a) {
-		
-		
+
 		System.out.println("Ja sam master i registrujem novi agentski centar");
 		database.getAgentskiCentri().add(a);
-		
+
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget = client.target(a.getAddress()+"/ATProjectWAR/rest/node/nodes");
-		Response response = rtarget.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgentskiCentri(),MediaType.APPLICATION_JSON));
-		
-		for(AgentskiCentar at : database.getAgentskiCentri()) {
-			if(at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
-				continue;			
+		ResteasyWebTarget rtarget = client.target(a.getAddress() + "/ATProjectWAR/rest/node/nodes");
+		Response response = rtarget.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(database.getAgentskiCentri(), MediaType.APPLICATION_JSON));
+
+		for (AgentskiCentar at : database.getAgentskiCentri()) {
+			if (at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
+				continue;
 			ResteasyClient client2 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget rtarget2 = client2.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node");
-			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).post(Entity.entity(a,MediaType.APPLICATION_JSON));
+			ResteasyWebTarget rtarget2 = client2
+					.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node");
+			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON)
+					.post(Entity.entity(a, MediaType.APPLICATION_JSON));
 		}
-		
+
 		ResteasyClient client3 = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget3 = client3.target(a.getAddress()+"/ATProjectWAR/rest/node/agents/classes");
-		Response response3 = rtarget3.request(MediaType.APPLICATION_JSON).get();		
-		List<AgentType> list =  response3.readEntity(ArrayList.class);
+		ResteasyWebTarget rtarget3 = client3.target(a.getAddress() + "/ATProjectWAR/rest/node/agents/classes");
+		Response response3 = rtarget3.request(MediaType.APPLICATION_JSON).get();
+		List<AgentType> list = response3.readEntity(ArrayList.class);
 		System.out.println("Primio sam nove tipove" + list);
-		
-		for(AgentskiCentar at : database.getAgentskiCentri()) {
-			if(at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
-				continue;			
+
+		for (AgentskiCentar at : database.getAgentskiCentri()) {
+			if (at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
+				continue;
 			ResteasyClient client4 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget rtarget4 = client4.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/agents/classes");
-			Response response4 = rtarget4.request(MediaType.APPLICATION_JSON).post(Entity.entity(list,MediaType.APPLICATION_JSON));
+			ResteasyWebTarget rtarget4 = client4
+					.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/agents/classes");
+			Response response4 = rtarget4.request(MediaType.APPLICATION_JSON)
+					.post(Entity.entity(list, MediaType.APPLICATION_JSON));
 		}
 		ResteasyClient client5 = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget5 = client5.target(a.getAddress()+"/ATProjectWAR/rest/node/agents/running");
-		
+		ResteasyWebTarget rtarget5 = client5.target(a.getAddress() + "/ATProjectWAR/rest/node/agents/running");
+
 		try {
-			Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgents(),MediaType.APPLICATION_JSON));
-		}catch(Exception e){
+			Response response5 = rtarget5.request(MediaType.APPLICATION_JSON)
+					.post(Entity.entity(database.getAgents(), MediaType.APPLICATION_JSON));
+		} catch (Exception e) {
 			try {
-				Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgents(),MediaType.APPLICATION_JSON));
-			}catch(Exception e1) {
-				for(AgentskiCentar at : database.getAgentskiCentri()) {
-					if(at.getAddress().equals(a.getAddress())|| at.getAddress().equals(masterIp))
-						continue;			
+				Response response5 = rtarget5.request(MediaType.APPLICATION_JSON)
+						.post(Entity.entity(database.getAgents(), MediaType.APPLICATION_JSON));
+			} catch (Exception e1) {
+				for (AgentskiCentar at : database.getAgentskiCentri()) {
+					if (at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
+						continue;
 					ResteasyClient client6 = new ResteasyClientBuilder().build();
-					ResteasyWebTarget rtarget6 = client6.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node"+a.getAddress());
+					ResteasyWebTarget rtarget6 = client6
+							.target(at.getAddress() + "/ATProjectWAR/rest/node/node/" + a.getAddress());
 					Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
 				}
 			}
-			
-			
-		}		
-		
-		
+
+		}
+
 	}
-	
+
 	@POST
 	@Path("/node")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -112,20 +121,23 @@ public class NodeRest {
 		database.getAgentskiCentri().add(a);
 		return;
 	}
+
 	@POST
 	@Path("/nodes")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void getNoMaster(ArrayList<AgentskiCentar> agents){
+	public void getNoMaster(ArrayList<AgentskiCentar> agents) {
 		System.out.println("Trenutno sam u novom ne-masteru i primam nove cvorove");
-		for(AgentskiCentar a : agents)
+		for (AgentskiCentar a : agents)
 			database.getAgentskiCentri().add(a);
-		return ;		
+		return;
 	}
+
 	@GET
 	@Path("/node")
 	public ResponseBuilder turnOffNode() {
 		return Response.ok();
 	}
+
 	@GET
 	@Path("/agents/classes")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -133,37 +145,59 @@ public class NodeRest {
 		System.out.println("Trenutno sam u ne-masteru i vracam sve tipove");
 		return database.getTypes();
 	}
+
 	@POST
 	@Path("/agents/classes")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public void receiveAgents(ArrayList<AgentType> agents){
+	public void receiveAgents(ArrayList<AgentType> agents) {
 		System.out.println("Trenutno sam u novom ne-masteru i primam nove tipove koje mi je master poslao");
-		for(AgentType a : agents)
+		for (AgentType a : agents)
 			database.getTypes().add(a);
-		return;		
+		return;
 	}
+
 	@POST
 	@Path("/agents/running")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response loggedIn(HashMap<String, Agent> runningAgents) {
 		System.out.println("Sada sam u novom ne-masteru i dobijam spisak pokrenutih agenata");
-		database.setAgents(runningAgents);
+		if (database.getAgents().size() == 0) {
+			database.setAgents(runningAgents);			
+		}
+		else {
+			database.getAgents().putAll(runningAgents);
+		}
+		for (Agent agent : runningAgents.values()) {
+			ObjectMapper mapper = new ObjectMapper();
+			String msg = null;
+			try {
+				msg = mapper.writeValueAsString(agent);
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			ws.echoTextMessage(msg);
+		}
 		return Response.status(200).build();
 	}
-	
+
 	@DELETE
 	@Path("/node/{alias}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void deleteNode(@PathParam("alias") String alias) {
 		System.out.println("Sada sam u ne-master cvoru i primio sam poruku koji je cvor neaktivan");
-		for(AgentskiCentar a :database.getAgentskiCentri()) {
-			if(a.getAddress() == alias) {
+		for (AgentskiCentar a : database.getAgentskiCentri()) {
+			if (a.getAddress() == alias) {
 				database.getAgentskiCentri().remove(a);
 				break;
-			}	
+			}
 		}
 	}
-	    
-		
 
 }

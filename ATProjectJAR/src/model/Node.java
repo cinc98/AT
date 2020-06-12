@@ -22,6 +22,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
+import com.sun.org.apache.bcel.internal.generic.ATHROW;
+
 @Singleton
 @Startup
 @Path("/")
@@ -33,24 +35,28 @@ public class Node {
 
 	Runnable heartbeat = () -> {
 		while (true) {
+			System.out.println("Koliko ih ima :" + database.getAgentskiCentri().size());
 			for (AgentskiCentar at : database.getAgentskiCentri()) {
 				if (at.getAddress().equals(this.currentIp))
 					continue;
+				
 				ResteasyClient client5 = new ResteasyClientBuilder().build();
 				ResteasyWebTarget rtarget5 = client5.target(at.getAddress() + "/ATProjectWAR/rest/node");
-
+				System.out.println(at.getAddress() + "HB");
 				try {
 					Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).get();
 				} catch (Exception e) {
 					try {
 						Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).get();
-					} catch (Exception e1) {
+					} catch (Exception e1) {						
+						database.getAgentskiCentri().remove(at);
+						System.out.println("Umro je " + at.getAddress());
 						for (AgentskiCentar atDelete : database.getAgentskiCentri()) {
 							if (at.getAddress().equals(this.currentIp))
 								continue;
 							ResteasyClient client6 = new ResteasyClientBuilder().build();
 							ResteasyWebTarget rtarget6 = client6.target("http://" + atDelete.getAddress()
-									+ ":8080/ATProjectWAR/rest/node/node" + at.getAddress());
+									+ ":8080/ATProjectWAR/rest/node/node/" + at.getAddress());
 							Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
 						}
 					}

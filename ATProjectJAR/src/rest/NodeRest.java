@@ -44,7 +44,7 @@ import ws.WSEndPoint;
 @Path("/node")
 public class NodeRest {
 	private String currentIp;
-	private String masterIp = "http://6f8b1d9f88c3.ngrok.io";
+	private String masterIp = "http://760f182d5acf.ngrok.io";
 	@EJB
 	WSEndPoint ws;
 	@EJB

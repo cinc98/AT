@@ -98,15 +98,14 @@ public class Rest {
 	public void stopAgent(@PathParam("aid") String aid) {
 		System.out.println("Treba da obrisem "+aid);
 		HashMap<String, Agent> agenti = database.getAgents();
-		
+		HashMap<String, Agent> temp = new HashMap();
 		for (String a : agenti.keySet()) {
-			System.out.println(agenti.get(a).getId().getHost().getAddress());
-			if (agenti.get(a).getId().getHost().getAddress().contains(aid)) {
-				System.out.println("Brisem");				
-				database.getAgents().remove(a);
-				break;
+			//System.out.println(agenti.get(a).getId().getHost().getAddress());
+			if (!agenti.get(a).getId().getHost().getAddress().contains(aid)) {
+				temp.put(a,agenti.get(a));			
 			}
-		}
+		}	
+		database.setAgents(temp);
 		ObjectMapper mapper = new ObjectMapper();
 		String msg=null;
 		try {
@@ -158,7 +157,7 @@ public class Rest {
 		}
 
 		currentIp = currentIp.substring(2, currentIp.length() - 2);
-		AgentskiCentar host = new AgentskiCentar(currentIp, "8080");
+		AgentskiCentar host = new AgentskiCentar("8080",currentIp);
 
 		AID aid = new AID(name, host, new AgentType(type, null));
 		Agent agent = new Agent(aid);

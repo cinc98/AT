@@ -31,7 +31,7 @@ import com.sun.org.apache.bcel.internal.generic.ATHROW;
 @Path("/")
 public class Node {
 	private String currentIp;
-	private String masterIp = "http://6f8b1d9f88c3.ngrok.io";
+	private String masterIp = "http://760f182d5acf.ngrok.io";
 	@EJB
 	Data database;
 

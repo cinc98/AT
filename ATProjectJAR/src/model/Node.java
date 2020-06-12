@@ -61,10 +61,12 @@ public class Node {
 									currentAT.add(a);								
 								}
 							}	
+							String del = at.getAddress().split("//")[1];
 							ResteasyClient clientDelete = new ResteasyClientBuilder().build();
 							ResteasyWebTarget rtargetDelete = clientDelete.target(this.masterIp
-									+ "/ATProjectWAR/rest/agents/running/" + at.getAddress());
+									+ "/ATProjectWAR/rest/agents/running/" + del);
 							Response responseDelete = rtargetDelete.request().delete();
+							System.out.println(this.masterIp+ "/ATProjectWAR/rest/agents/running/" + del+" -->"+responseDelete.getStatus());
 							
 							database.setAgentskiCentri((ArrayList<AgentskiCentar>) currentAT);
 							for (AgentskiCentar atDelete : database.getAgentskiCentri()) {

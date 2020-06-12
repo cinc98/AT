@@ -98,8 +98,11 @@ public class Rest {
 	public void stopAgent(@PathParam("aid") String aid) {
 		System.out.println("Treba da obrisem "+aid);
 		HashMap<String, Agent> agenti = database.getAgents();
-		for (Agent a : agenti.values()) {
-			if (a.getId().getHost().getAddress().equals(aid)) {
+		
+		for (String a : agenti.keySet()) {
+			System.out.println(agenti.get(a).getId().getHost().getAddress());
+			if (agenti.get(a).getId().getHost().getAddress().contains(aid)) {
+				System.out.println("Brisem");				
 				database.getAgents().remove(a);
 				break;
 			}

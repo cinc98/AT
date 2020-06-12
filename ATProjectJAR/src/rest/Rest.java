@@ -15,6 +15,7 @@ import javax.ejb.EJB;
 import javax.ejb.LocalBean;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -30,6 +31,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
+import jms.JMSQueue;
+import model.ACLPoruka;
 import model.AID;
 import model.Agent;
 import model.AgentType;
@@ -48,14 +51,15 @@ public class Rest {
 
 	@EJB
 	WSEndPoint ws;
-	
+
 	@GET
 	@Path("/search/{brand}/{priceFrom}/{priceTo}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ArrayList<String> search(@PathParam(value = "brand") String brand, @PathParam(value = "priceFrom") String p1,
 			@PathParam(value = "priceTo") String p2) {
 		Spyder spider = new Spyder();
-		String url = "https://www.polovniautomobili.com/auto-oglasi/pretraga?brand="+brand+"&price_from="+p1+"&price_to="+p2;
+		String url = "https://www.polovniautomobili.com/auto-oglasi/pretraga?brand=" + brand + "&price_from=" + p1
+				+ "&price_to=" + p2;
 		System.out.println(url);
 		List<String> prices = new ArrayList<String>();
 		prices = spider.search(url, "audi");
@@ -72,6 +76,14 @@ public class Rest {
 			temp.add(p);
 		}
 		return temp;
+	}
+
+	// POST /messages – pošalji ACL poruku; 
+	@POST
+	@Path("/messages")
+	@Produces(MediaType.APPLICATION_JSON)
+	public void sendMessage(ACLPoruka aclPoruka) {
+		new JMSQueue(aclPoruka);
 	}
 
 	// GET /agents/classes – dobavi listu svih tipova agenata na sistemu
@@ -96,18 +108,18 @@ public class Rest {
 	@DELETE
 	@Path("/agents/running/{aid}")
 	public void stopAgent(@PathParam("aid") String aid) {
-		System.out.println("Treba da obrisem "+aid);
+		System.out.println("Treba da obrisem " + aid);
 		HashMap<String, Agent> agenti = database.getAgents();
 		HashMap<String, Agent> temp = new HashMap();
 		for (String a : agenti.keySet()) {
-			//System.out.println(agenti.get(a).getId().getHost().getAddress());
+			// System.out.println(agenti.get(a).getId().getHost().getAddress());
 			if (!agenti.get(a).getId().getHost().getAddress().contains(aid)) {
-				temp.put(a,agenti.get(a));			
+				temp.put(a, agenti.get(a));
 			}
-		}	
+		}
 		database.setAgents(temp);
 		ObjectMapper mapper = new ObjectMapper();
-		String msg=null;
+		String msg = null;
 		try {
 			msg = mapper.writeValueAsString(database.getAgents().values());
 		} catch (JsonGenerationException e) {
@@ -121,7 +133,7 @@ public class Rest {
 			e.printStackTrace();
 		}
 		ws.echoTextMessage(msg);
-		
+
 	}
 
 	// PUT /agents/running/{type}/{name} – pokreni agenta odredenog tipa sa zadatim
@@ -129,13 +141,13 @@ public class Rest {
 	@PUT
 	@Path("/agents/running/{type}/{name}")
 	public void startAgent(@PathParam("type") String type, @PathParam("name") String name) {
-		
+
 		System.out.println("Primam novi running cvor");
 		String currentIp = "";
 		BufferedReader br = null;
 		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
 		String line = "";
-		
+
 		try {
 			br = new BufferedReader(new FileReader(p.toString() + "\\config.txt"));
 
@@ -157,13 +169,13 @@ public class Rest {
 		}
 
 		currentIp = currentIp.substring(2, currentIp.length() - 2);
-		AgentskiCentar host = new AgentskiCentar("8080",currentIp);
+		AgentskiCentar host = new AgentskiCentar("8080", currentIp);
 
 		AID aid = new AID(name, host, new AgentType(type, null));
 		Agent agent = new Agent(aid);
 		database.getAgents().put(aid.getName(), agent);
 		ObjectMapper mapper = new ObjectMapper();
-		String msg=null;
+		String msg = null;
 		try {
 			msg = mapper.writeValueAsString(database.getAgents().values());
 		} catch (JsonGenerationException e) {
@@ -177,15 +189,15 @@ public class Rest {
 			e.printStackTrace();
 		}
 		ws.echoTextMessage(msg);
-		
-	 
-	    for(AgentskiCentar at : database.getAgentskiCentri()) {
-			if(at.getAddress().equals(currentIp))
-				continue;			
+
+		for (AgentskiCentar at : database.getAgentskiCentri()) {
+			if (at.getAddress().equals(currentIp))
+				continue;
 			ResteasyClient client2 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget rtarget2 = client2.target(at.getAddress()+"/ATProjectWAR/rest/node/agents/running");
+			ResteasyWebTarget rtarget2 = client2.target(at.getAddress() + "/ATProjectWAR/rest/node/agents/running");
 			System.out.println(database.getAgents());
-			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgents(),MediaType.APPLICATION_JSON));
+			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON)
+					.post(Entity.entity(database.getAgents(), MediaType.APPLICATION_JSON));
 		}
 	}
 

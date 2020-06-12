@@ -8,15 +8,17 @@ export default new Vuex.Store({
     activeAgents:[]
   },
   mutations: {
+    fetchActiveAgentsString(state, agents){
+      state.activeAgents.length = 0;
+      state.activeAgents=JSON.parse(agents);
+     
+    },
     fetchActiveAgents(state, agents){
       state.activeAgents.length = 0;
-      agents.forEach((agent) =>{
-        state.activeAgents.push(agent);
-      })
+        state.activeAgents=agents;
+     
     },
-    newAgent(state, msg) {
-      state.activeAgents.push(JSON.parse(msg));
-  },
+    
   },
   actions: {
   },

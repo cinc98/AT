@@ -165,13 +165,15 @@ public class NodeRest {
 			database.setAgents(runningAgents);			
 		}
 		else {
-			database.getAgents().putAll(runningAgents);
+			for(String aid : runningAgents.keySet()) {
+				database.getAgents().put(aid, runningAgents.get(aid));
+			}
 		}
-		for (Agent agent : runningAgents.values()) {
+			
 			ObjectMapper mapper = new ObjectMapper();
 			String msg = null;
 			try {
-				msg = mapper.writeValueAsString(agent);
+				msg = mapper.writeValueAsString(database.getAgents().values());
 			} catch (JsonGenerationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -183,7 +185,7 @@ public class NodeRest {
 				e.printStackTrace();
 			}
 			ws.echoTextMessage(msg);
-		}
+		
 		return Response.status(200).build();
 	}
 

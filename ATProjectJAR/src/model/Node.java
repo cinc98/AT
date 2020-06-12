@@ -29,7 +29,7 @@ import com.sun.org.apache.bcel.internal.generic.ATHROW;
 @Path("/")
 public class Node {
 	private String currentIp;
-	private String masterIp = "http://b4507c2dd9c6.ngrok.io";
+	private String masterIp = "http://6f8b1d9f88c3.ngrok.io";
 	@EJB
 	Data database;
 
@@ -42,15 +42,23 @@ public class Node {
 				
 				ResteasyClient client5 = new ResteasyClientBuilder().build();
 				ResteasyWebTarget rtarget5 = client5.target(at.getAddress() + "/ATProjectWAR/rest/node");
-				System.out.println(at.getAddress() + "HB");
+				
 				try {
-					Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).get();
+					System.out.println(at.getAddress() + "--------HB1");
+					Response response5 = rtarget5.request().get();
+					System.out.println(response5.getStatus());
 				} catch (Exception e) {
 					try {
-						Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).get();
+						System.out.println(at.getAddress() + "--------HB2");
+						Response response5 = rtarget5.request().get();
 					} catch (Exception e1) {						
-						database.getAgentskiCentri().remove(at);
 						System.out.println("Umro je " + at.getAddress());
+						for(AgentskiCentar a : database.getAgentskiCentri()) {
+							if(a.getAddress().equals(at.getAddress())) {
+								database.getAgentskiCentri().remove(a);
+								break;
+							}
+						}						
 						for (AgentskiCentar atDelete : database.getAgentskiCentri()) {
 							if (at.getAddress().equals(this.currentIp))
 								continue;

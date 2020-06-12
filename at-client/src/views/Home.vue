@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     newAgent(agent) {
-      this.$store.commit("newAgent", agent);
+      this.$store.commit("fetchActiveAgentsString", agent);
     }
   },
   created() {

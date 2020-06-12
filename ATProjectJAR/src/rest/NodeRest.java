@@ -1,5 +1,10 @@
 package rest;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +40,8 @@ import model.IAgent;
 @Startup
 @Path("/node")
 public class NodeRest {
+	private String currentIp;
+	private String masterIp = "http://b4507c2dd9c6.ngrok.io";
 	
 	@EJB
 	Data database;
@@ -43,15 +50,17 @@ public class NodeRest {
 	@Path("/register")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public void notifyMaster(AgentskiCentar a) {
+		
+		
 		System.out.println("Ja sam master i registrujem novi agentski centar");
 		database.getAgentskiCentri().add(a);
 		
 		ResteasyClient client = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget = client.target("http://06705c057400.ngrok.io/ATProjectWAR/rest/node/nodes");
+		ResteasyWebTarget rtarget = client.target(a.getAddress()+"/ATProjectWAR/rest/node/nodes");
 		Response response = rtarget.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgentskiCentri(),MediaType.APPLICATION_JSON));
 		
 		for(AgentskiCentar at : database.getAgentskiCentri()) {
-			if(at.getAddress().equals(a.getAddress()) || at.getAddress().equals("http://7cbf1630576a.ngrok.io"))
+			if(at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
 				continue;			
 			ResteasyClient client2 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget rtarget2 = client2.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node");
@@ -59,41 +68,38 @@ public class NodeRest {
 		}
 		
 		ResteasyClient client3 = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget3 = client3.target("http://06705c057400.ngrok.io/ATProjectWAR/rest/node/agents/classes");
+		ResteasyWebTarget rtarget3 = client3.target(a.getAddress()+"/ATProjectWAR/rest/node/agents/classes");
 		Response response3 = rtarget3.request(MediaType.APPLICATION_JSON).get();		
 		List<AgentType> list =  response3.readEntity(ArrayList.class);
 		System.out.println("Primio sam nove tipove" + list);
 		
 		for(AgentskiCentar at : database.getAgentskiCentri()) {
-			if(at.getAddress().equals(a.getAddress()) || at.getAddress().equals("http://7cbf1630576a.ngrok.io"))
+			if(at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
 				continue;			
 			ResteasyClient client4 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget rtarget4 = client4.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/agents/classes");
 			Response response4 = rtarget4.request(MediaType.APPLICATION_JSON).post(Entity.entity(list,MediaType.APPLICATION_JSON));
 		}
-		int num = 1;
-		
-		while(num !=3) {
 		ResteasyClient client5 = new ResteasyClientBuilder().build();
-		ResteasyWebTarget rtarget5 = client5.target("http://06705c057400.ngrok.io/ATProjectWAR/rest/node/agents/running");
-		Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgents(),MediaType.APPLICATION_JSON));
-		System.out.println(response5.getStatus());
-		if(response5.getStatus()==200) {
-				break;
-			}
-			num++;
-		}
+		ResteasyWebTarget rtarget5 = client5.target(a.getAddress()+"/ATProjectWAR/rest/node/agents/running");
 		
-		if(num == 3) {
-			for(AgentskiCentar at : database.getAgentskiCentri()) {
-				if(at.getAddress().equals(a.getAddress())|| at.getAddress().equals("http://7cbf1630576a.ngrok.io"))
-					continue;			
-				ResteasyClient client6 = new ResteasyClientBuilder().build();
-				ResteasyWebTarget rtarget6 = client6.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node"+a.getAddress());
-				Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
+		try {
+			Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgents(),MediaType.APPLICATION_JSON));
+		}catch(Exception e){
+			try {
+				Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).post(Entity.entity(database.getAgents(),MediaType.APPLICATION_JSON));
+			}catch(Exception e1) {
+				for(AgentskiCentar at : database.getAgentskiCentri()) {
+					if(at.getAddress().equals(a.getAddress())|| at.getAddress().equals(masterIp))
+						continue;			
+					ResteasyClient client6 = new ResteasyClientBuilder().build();
+					ResteasyWebTarget rtarget6 = client6.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node"+a.getAddress());
+					Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
+				}
 			}
-		}
-		
+			
+			
+		}		
 		
 		
 	}

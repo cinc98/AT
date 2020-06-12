@@ -27,14 +27,50 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 @Path("/")
 public class Node {
 	private String currentIp;
-	private String masterIp = null;
+	private String masterIp = "http://b4507c2dd9c6.ngrok.io";
 	@EJB
 	Data database;
-	
+
+	Runnable heartbeat = () -> {
+		while (true) {
+			for (AgentskiCentar at : database.getAgentskiCentri()) {
+				if (at.getAddress().equals(this.currentIp))
+					continue;
+				ResteasyClient client5 = new ResteasyClientBuilder().build();
+				ResteasyWebTarget rtarget5 = client5.target(at.getAddress() + "/ATProjectWAR/rest/node");
+
+				try {
+					Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).get();
+				} catch (Exception e) {
+					try {
+						Response response5 = rtarget5.request(MediaType.APPLICATION_JSON).get();
+					} catch (Exception e1) {
+						for (AgentskiCentar atDelete : database.getAgentskiCentri()) {
+							if (at.getAddress().equals(this.currentIp))
+								continue;
+							ResteasyClient client6 = new ResteasyClientBuilder().build();
+							ResteasyWebTarget rtarget6 = client6.target("http://" + atDelete.getAddress()
+									+ ":8080/ATProjectWAR/rest/node/node" + at.getAddress());
+							Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
+						}
+					}
+
+				}
+			}
+
+			try {
+				TimeUnit.SECONDS.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+
+		}
+	};
+
 	Runnable task = () -> {
 
 		try {
-			TimeUnit.SECONDS.sleep(3);
+			TimeUnit.SECONDS.sleep(2);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -46,9 +82,8 @@ public class Node {
 	public void init() {
 		BufferedReader br = null;
 		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
-		System.out.println("path: " + p.toString());
 		String line = "";
-
+		
 		try {
 			br = new BufferedReader(new FileReader(p.toString() + "\\config.txt"));
 
@@ -63,36 +98,24 @@ public class Node {
 					e.printStackTrace();
 				}
 			}
-			masterIp = sb.toString();
+			currentIp = sb.toString();
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 
-		masterIp = masterIp.substring(2, masterIp.length() - 2);
+		currentIp = currentIp.substring(2, currentIp.length() - 2);
 		System.out.println("MasterIP : " + masterIp);
-
-		InetAddress ip = null;
-
-		try {
-			ip = InetAddress.getLocalHost();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-		currentIp = ip.toString();
-		String[] split = currentIp.split("/");
-		currentIp = split[1];
-		String[] split2 = currentIp.split("/n");
-		currentIp = split2[0];
 		System.out.println("CurrentIP : " + currentIp);
-		currentIp  = masterIp;
-		if (!currentIp.equals( masterIp)) {
+		
+		if (!currentIp.equals(masterIp)) {
 			Thread thread = new Thread(task);
 			thread.start();
-		}else {
-			database.getAgentskiCentri().add(new AgentskiCentar("", "http://7cbf1630576a.ngrok.io"));
+		} else {
+			database.getAgentskiCentri().add(new AgentskiCentar("8080", this.currentIp));
 		}
-
+		Thread thread1 = new Thread(heartbeat);
+		thread1.start();
 	}
 
 	public void notifyMaster(String connection) {

@@ -1,8 +1,12 @@
 package rest;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,24 +133,38 @@ public class Rest {
 			e.printStackTrace();
 		}
 		ws.echoTextMessage(msg);
-		String currentIp;
-		InetAddress ip = null ;
-        try {
-            ip = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        currentIp = ip.toString();
-	    String[] split = currentIp.split("/");
-	    currentIp=split[1];
-	    String[] split2 = currentIp.split("/n");
-	    currentIp=split2[0];
+		String currentIp = "";
+		BufferedReader br = null;
+		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
+		String line = "";
+		
+		try {
+			br = new BufferedReader(new FileReader(p.toString() + "\\config.txt"));
+
+			StringBuilder sb = new StringBuilder();
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				try {
+					line = br.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			currentIp = sb.toString();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		currentIp = currentIp.substring(2, currentIp.length() - 2);
 	  //Ulogovao se novi , treba da se javi svim hostovima
 	    for(AgentskiCentar at : database.getAgentskiCentri()) {
 			if(at.getAddress().equals(currentIp))
 				continue;			
 			ResteasyClient client2 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget rtarget2 = client2.target("http://7cbf1630576a.ngrok.io/ATProjectWAR/rest/agents/running/"+type+"/"+name);
+			ResteasyWebTarget rtarget2 = client2.target(at.getAddress()+"/ATProjectWAR/rest/agents/running/"+type+"/"+name);
 			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON).put(Entity.entity(host,MediaType.APPLICATION_JSON));
 		}
 	}

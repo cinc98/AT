@@ -44,7 +44,7 @@ import ws.WSEndPoint;
 @Path("/node")
 public class NodeRest {
 	private String currentIp;
-	private String masterIp = "http://b4507c2dd9c6.ngrok.io";
+	private String masterIp = "http://6f8b1d9f88c3.ngrok.io";
 	@EJB
 	WSEndPoint ws;
 	@EJB
@@ -62,17 +62,19 @@ public class NodeRest {
 		ResteasyWebTarget rtarget = client.target(a.getAddress() + "/ATProjectWAR/rest/node/nodes");
 		Response response = rtarget.request(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(database.getAgentskiCentri(), MediaType.APPLICATION_JSON));
-
+		System.out.println(database.getAgentskiCentri().toString());
+		
 		for (AgentskiCentar at : database.getAgentskiCentri()) {
 			if (at.getAddress().equals(a.getAddress()) || at.getAddress().equals(masterIp))
 				continue;
+			System.out.println(at.getAddress() + " "+ a.getAddress());
 			ResteasyClient client2 = new ResteasyClientBuilder().build();
 			ResteasyWebTarget rtarget2 = client2
-					.target("http://" + at.getAddress() + ":8080/ATProjectWAR/rest/node/node");
+					.target(at.getAddress() + "/ATProjectWAR/rest/node/node");
 			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON)
 					.post(Entity.entity(a, MediaType.APPLICATION_JSON));
 		}
-
+		
 		ResteasyClient client3 = new ResteasyClientBuilder().build();
 		ResteasyWebTarget rtarget3 = client3.target(a.getAddress() + "/ATProjectWAR/rest/node/agents/classes");
 		Response response3 = rtarget3.request(MediaType.APPLICATION_JSON).get();

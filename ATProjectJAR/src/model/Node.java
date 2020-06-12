@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -46,28 +48,42 @@ public class Node {
 				try {
 					System.out.println(at.getAddress() + "--------HB1");
 					Response response5 = rtarget5.request().get();
-					System.out.println(response5.getStatus());
-				} catch (Exception e) {
-					try {
-						System.out.println(at.getAddress() + "--------HB2");
-						Response response5 = rtarget5.request().get();
-					} catch (Exception e1) {						
-						System.out.println("Umro je " + at.getAddress());
-						for(AgentskiCentar a : database.getAgentskiCentri()) {
-							if(a.getAddress().equals(at.getAddress())) {
-								database.getAgentskiCentri().remove(a);
-								break;
+					if(response5.getStatus() == 502) {
+						try {
+							System.out.println(response5.getStatus() + "--------HB2");
+							response5 = rtarget5.request().get();
+							
+						} catch (Exception e1) {	
+							System.out.println("Umro je " + at.getAddress());
+							List<AgentskiCentar> currentAT = new ArrayList<>();
+							for(AgentskiCentar a : database.getAgentskiCentri()) {
+								if(!a.getAddress().equals(at.getAddress())) {
+									currentAT.add(a);								
+								}
+							}	
+							ResteasyClient clientDelete = new ResteasyClientBuilder().build();
+							ResteasyWebTarget rtargetDelete = clientDelete.target(this.masterIp
+									+ "/ATProjectWAR/rest/agents/running/" + at.getAddress());
+							Response responseDelete = rtargetDelete.request().delete();
+							
+							database.setAgentskiCentri((ArrayList<AgentskiCentar>) currentAT);
+							for (AgentskiCentar atDelete : database.getAgentskiCentri()) {
+								if (atDelete.getAddress().equals(this.currentIp))
+									continue;
+								System.out.println("DELETE");
+								ResteasyClient client6 = new ResteasyClientBuilder().build();
+								ResteasyWebTarget rtarget6 = client6.target(atDelete.getAddress()
+										+ "/ATProjectWAR/rest/node/node/" + at.getAddress());
+								Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
+								
+								
+								
+								
 							}
-						}						
-						for (AgentskiCentar atDelete : database.getAgentskiCentri()) {
-							if (at.getAddress().equals(this.currentIp))
-								continue;
-							ResteasyClient client6 = new ResteasyClientBuilder().build();
-							ResteasyWebTarget rtarget6 = client6.target("http://" + atDelete.getAddress()
-									+ ":8080/ATProjectWAR/rest/node/node/" + at.getAddress());
-							Response response6 = rtarget6.request(MediaType.APPLICATION_JSON).delete();
 						}
 					}
+				} catch (Exception e) {
+					System.out.println("EVO ME U CATCH1");
 
 				}
 			}

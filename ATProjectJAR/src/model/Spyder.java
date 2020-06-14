@@ -7,46 +7,29 @@ import java.util.Set;
 
 public class Spyder {
 	private static final int MAX_PAGES_TO_SEARCH = 10;
-    private Set<String> pagesVisited = new HashSet<String>();
-    private List<String> pagesToVisit = new ArrayList<String>();
+    private List<Car> prices = new ArrayList<Car>();
     
     
-    public ArrayList<String> search(String url, String searchWord)
+    public ArrayList<Car> search(String year_from,String year_to,String p1,String p2)
     {
-        while(this.pagesVisited.size() < MAX_PAGES_TO_SEARCH)
-        {
-            String currentUrl;
+    	int i = 1;
+        while(i <3)
+        { 
+            String currentUrl= "https://www.polovniautomobili.com/auto-oglasi/pretraga??page="+i+"&year_from=" + year_from + "&year_to="
+    				+ year_to + "&price_from=" + p1 + "&price_to=" + p2;
             SpyderLeg leg = new SpyderLeg();
-            if(this.pagesToVisit.isEmpty())
-            {
-                currentUrl = url;
-                this.pagesVisited.add(url);
-            }
-            else
-            {
-                currentUrl = this.nextUrl();
-            }
-            this.pagesToVisit =leg.crawl(currentUrl); 
-            boolean success = leg.searchForWord(searchWord);
-            if(success)
-            {
-                System.out.println(String.format("**Success** Word %s found at %s", searchWord, currentUrl));
-                break;
-            }
-            //this.pagesToVisit.addAll(leg.getLinks());
+            List<Car> ret = leg.crawl(currentUrl);
+            if(prices.size()==0) {
+            	this.prices =ret; 
+            }else {
+            	for(Car s : ret) {
+            		this.prices.add(s);
+            	}
+            }           
+            i++;
         }
-        System.out.println(String.format("**Done** Visited %s web page(s)", this.pagesVisited.size()));
-		return (ArrayList<String>) pagesToVisit;
+        return (ArrayList<Car>) prices;
     }
-    private String nextUrl(){
-        String nextUrl;
-        do
-        {
-            nextUrl = this.pagesToVisit.remove(0);
-        } while(this.pagesVisited.contains(nextUrl));
-        
-        this.pagesVisited.add(nextUrl);
-        return nextUrl;
-    }
+   
 }
 

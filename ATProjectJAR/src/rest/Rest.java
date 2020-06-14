@@ -1,9 +1,12 @@
 package rest;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.Paths;
@@ -37,6 +40,7 @@ import model.AID;
 import model.Agent;
 import model.AgentType;
 import model.AgentskiCentar;
+import model.Car;
 import model.Data;
 import model.IAgent;
 import model.Performative;
@@ -53,19 +57,80 @@ public class Rest {
 	WSEndPoint ws;
 
 	@GET
-	@Path("/search/{brand}/{priceFrom}/{priceTo}")
+	@Path("/search/{year_from}/{year_to}/{priceFrom}/{priceTo}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ArrayList<String> search(@PathParam(value = "brand") String brand, @PathParam(value = "priceFrom") String p1,
-			@PathParam(value = "priceTo") String p2) {
+	public String search(@PathParam(value = "year_from") String year_from,
+			@PathParam(value = "year_to") String year_to, @PathParam(value = "priceFrom") String p1,
+			@PathParam(value = "priceTo") String p2) throws IOException, InterruptedException {
 		Spyder spider = new Spyder();
-		String url = "https://www.polovniautomobili.com/auto-oglasi/pretraga?brand=" + brand + "&price_from=" + p1
-				+ "&price_to=" + p2;
-		System.out.println(url);
-		List<String> prices = new ArrayList<String>();
-		prices = spider.search(url, "audi");
-		return (ArrayList<String>) prices;
+		
+		List<Car> prices = new ArrayList<Car>();
+		prices = spider.search(year_from,year_to,p1,p2);
+		System.out.println("Ende" + prices);
+		ObjectMapper mapper = new ObjectMapper();
+		String msg = null;
+		try {
+			msg = mapper.writeValueAsString(prices);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try (PrintWriter out = new PrintWriter(System.getProperty("user.dir")+"data.json")) {
+		    out.println(msg);
+		}
+		    
+		return msg;
 	}
+	
+	@GET
+	@Path("/predict/{year}/{km}/{power}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String predict(@PathParam(value = "year") String year,
+			@PathParam(value = "km") String km, @PathParam(value = "power") String power) {
+		String s = null;
+		String predict = "";
+        try {
+            
+        	String command = "python C:\\Users\\HP\\Desktop\\Fakultet\\AT\\AT\\predict.py "+year + " " + km + " " + power;
+    		Process p = Runtime.getRuntime().exec(command);
+    		
+            BufferedReader stdInput = new BufferedReader(new 
+                 InputStreamReader(p.getInputStream()));
 
+            BufferedReader stdError = new BufferedReader(new 
+                 InputStreamReader(p.getErrorStream()));
+
+            // read the output from the command
+            //System.out.println("Here is the standard output of the command:\n");
+            
+            while ((s = stdInput.readLine()) != null) {
+                //System.out.println(s);
+            	predict = s;
+            }
+            System.out.println("Vasa cena je : " + predict);
+            
+            // read any errors from the attempted command
+            //System.out.println("Here is the standard error of the command (if any):\n");
+            while ((s = stdError.readLine()) != null) {
+                System.out.println(s);
+            }
+            
+        }
+        catch (IOException e) {
+            System.out.println("exception happened - here's what I know: ");
+            e.printStackTrace();
+            System.exit(-1);
+        }
+		
+		return predict;
+	}
+	
 	// GET/messages – dobavi listu performativa
 	@GET
 	@Path("/messages")
@@ -78,7 +143,7 @@ public class Rest {
 		return temp;
 	}
 
-	// POST /messages – pošalji ACL poruku; 
+	// POST /messages – pošalji ACL poruku;
 	@POST
 	@Path("/messages")
 	@Produces(MediaType.APPLICATION_JSON)

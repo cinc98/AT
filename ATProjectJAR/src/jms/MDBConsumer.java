@@ -80,11 +80,11 @@ public class MDBConsumer implements MessageListener {
 
 			currentIp = currentIp.substring(2, currentIp.length() - 2);
 			AgentskiCentar host = new AgentskiCentar("8080", currentIp);
-			List<IAgent> lista = new ArrayList<IAgent>();
+			List<Agent> lista = new ArrayList<Agent>();
 			for (AID a : acl.getReceivers()) {
-				for (IAgent ag : database.getAgents().values()) {
-					if (a.getName().equals(ag.getAid().getName())
-							&& a.getType().getName().equals(ag.getAid().getType().getName())) {
+				for (Agent ag : database.getAgents().values()) {
+					if (a.getName().equals(ag.getId().getName())
+							&& a.getType().getName().equals(ag.getId().getType().getName())) {
 						lista.add(ag);
 					}
 
@@ -92,9 +92,9 @@ public class MDBConsumer implements MessageListener {
 			}
 			for (int i = 0; i < lista.size(); i++) {
 
-				System.out.println(lista.get(i).getAid().getHost().getAddress());
+				System.out.println(lista.get(i).getId().getHost().getAddress());
 				System.out.println(host.getAddress());
-				if (lista.get(i).getAid().getHost().getAddress().equals(host.getAddress())) {
+				if (lista.get(i).getId().getHost().getAddress().equals(host.getAddress())) {
 					ACLPoruka acln = new ACLPoruka(acl, i);
 					ObjectMapper mapper = new ObjectMapper();
 					String msgjson = null;
@@ -117,7 +117,7 @@ public class MDBConsumer implements MessageListener {
 					ACLPoruka acln1 = new ACLPoruka(acl, i);
 					ResteasyClient client = new ResteasyClientBuilder().build();
 					ResteasyWebTarget target = client
-							.target(lista.get(i).getAid().getHost().getAddress() + "/ATProjectWAR/rest/messages");
+							.target(lista.get(i).getId().getHost().getAddress() + "/ATProjectWAR/rest/messages");
 					target.request(MediaType.APPLICATION_JSON).post(Entity.entity(acln1, MediaType.APPLICATION_JSON));
 				}
 			}

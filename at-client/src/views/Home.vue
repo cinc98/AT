@@ -38,7 +38,7 @@ export default {
       console.log(event);
     };
     this.socket.onmessage = function(event) {
-      if (JSON.parse(event.data).performative === undefined) {
+      if (JSON.parse(event.data).performative === undefined) {       
         vm.newAgent(event.data);
       } else {
         vm.newMessage(event.data);

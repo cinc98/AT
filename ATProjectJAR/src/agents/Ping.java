@@ -20,7 +20,7 @@ public class Ping extends Agent {
 			aclPoruka.setSender(this.getId());
 			aclPoruka.setReceivers(new AID[] { poruka.getSender() });
 			aclPoruka.setConversationId(poruka.getConversationId());
-			aclPoruka.setPerformative(Performative.REQUEST);
+			aclPoruka.setPerformative(Performative.INFORM);
 			aclPoruka.setContent("vratio");
 			new JMSQueue(aclPoruka);
 		} else if (poruka.getPerformative().equals(Performative.INFORM)) {

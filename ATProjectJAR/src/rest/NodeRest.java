@@ -44,7 +44,7 @@ import ws.WSEndPoint;
 @Path("/node")
 public class NodeRest {
 	private String currentIp;
-	private String masterIp = "http://760f182d5acf.ngrok.io";
+	private String masterIp = "http://040d4888e8f5.ngrok.io";
 	@EJB
 	WSEndPoint ws;
 	@EJB
@@ -136,8 +136,9 @@ public class NodeRest {
 
 	@GET
 	@Path("/node")
-	public ResponseBuilder turnOffNode() {
-		return Response.ok();
+	public Response turnOffNode() {
+		System.out.println("Ziv");
+		return Response.status(200).build();
 	}
 
 	@GET
@@ -161,7 +162,7 @@ public class NodeRest {
 	@POST
 	@Path("/agents/running")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response loggedIn(HashMap<String, IAgent> runningAgents) {
+	public Response loggedIn(HashMap<String, Agent> runningAgents) {
 		System.out.println("Sada sam u novom ne-masteru i dobijam spisak pokrenutih agenata");
 		if (database.getAgents().size() == 0) {
 			database.setAgents(runningAgents);			

@@ -177,11 +177,11 @@ public class Rest {
 	@Path("/agents/running/{aid}")
 	public void stopAgent(@PathParam("aid") String aid) {
 		System.out.println("Treba da obrisem " + aid);
-		HashMap<String, IAgent> agenti = database.getAgents();
-		HashMap<String, IAgent> temp = new HashMap();
+		HashMap<String, Agent> agenti = database.getAgents();
+		HashMap<String, Agent> temp = new HashMap();
 		for (String a : agenti.keySet()) {
 			// System.out.println(agenti.get(a).getId().getHost().getAddress());
-			if (!agenti.get(a).getAid().getHost().getAddress().contains(aid)) {
+			if (!agenti.get(a).getId().getHost().getAddress().contains(aid)) {
 				temp.put(a, agenti.get(a));
 			}
 		}
@@ -246,13 +246,13 @@ public class Rest {
 				Ping ping = new Ping();
 				AID a = new AID(name, host, new AgentType(type,null));
 				ping.setId(a);
-				database.getAgents().put(ping.getAid().getName(), ping);
+				database.getAgents().put(ping.getId().getName(), ping);
 				break;
 			case "Pong":
 				Pong pong = new Pong();
 				AID a1 = new AID(name, host, new AgentType(type,null));
 				pong.setId(a1);
-				database.getAgents().put(pong.getAid().getName(), pong);
+				database.getAgents().put(pong.getId().getName(), pong);
 				break;
 
 			default:

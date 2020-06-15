@@ -31,7 +31,7 @@ import com.sun.org.apache.bcel.internal.generic.ATHROW;
 @Path("/")
 public class Node {
 	private String currentIp;
-	private String masterIp = "http://760f182d5acf.ngrok.io";
+	private String masterIp = "http://040d4888e8f5.ngrok.io";
 	@EJB
 	Data database;
 
@@ -43,7 +43,7 @@ public class Node {
 					continue;
 				
 				ResteasyClient client5 = new ResteasyClientBuilder().build();
-				ResteasyWebTarget rtarget5 = client5.target(at.getAddress() + "/ATProjectWAR/rest/node");
+				ResteasyWebTarget rtarget5 = client5.target(at.getAddress() + "/ATProjectWAR/rest/node/node");
 				
 				try {
 					System.out.println(at.getAddress() + "--------HB1");

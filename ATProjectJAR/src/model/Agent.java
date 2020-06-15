@@ -34,9 +34,4 @@ public class Agent implements IAgent {
 		
 	}
 	
-	@Override
-	public AID getAid(){
-		return id;
-	}
-
 }

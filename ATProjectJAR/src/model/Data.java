@@ -19,7 +19,7 @@ public class Data {
 
 	private static ArrayList<AgentType> types = new ArrayList<>();
 	private static ArrayList<AgentskiCentar> agentskiCentri = new ArrayList<>();
-	private static HashMap<String, IAgent> agents = new HashMap<>();
+	private static HashMap<String, Agent> agents = new HashMap<>();
 
 	static {
 
@@ -51,11 +51,11 @@ public class Data {
 		this.types = tipovi;
 	}
 
-	public HashMap<String, IAgent> getAgents() {
+	public HashMap<String, Agent> getAgents() {
 		return agents;
 	}
 
-	public void setAgents(HashMap<String, IAgent> agenti) {
+	public void setAgents(HashMap<String, Agent> agenti) {
 		this.agents = agenti;
 	}
 

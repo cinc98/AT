@@ -16,25 +16,24 @@ import ws.WSEndPoint;
 public class Data {
 	@EJB
 	private WSEndPoint ws;
-	
+
 	private static ArrayList<AgentType> types = new ArrayList<>();
 	private static ArrayList<AgentskiCentar> agentskiCentri = new ArrayList<>();
-	private static HashMap<String, Agent> agents = new HashMap<>();
-	
-	static{
-		
-		
+	private static HashMap<String, IAgent> agents = new HashMap<>();
+
+	static {
+
 		AgentType a = new AgentType();
 		a.setModule("abc");
-		a.setName("test");
+		a.setName("Ping");
 		types.add(a);
-		
-//		AID a1 = new AID();
-//		a1.setName("prvi");
-//		agents.put(a1,new Agent(new AID("A",null,null)));
-//		agents.put(new AID(), new Agent(new AID("B",null,null)));
+
+		AgentType a1 = new AgentType();
+		a1.setModule("abc");
+		a1.setName("Pong");
+		types.add(a1);
+
 	}
-	
 
 	public ArrayList<AgentskiCentar> getAgentskiCentri() {
 		return agentskiCentri;
@@ -52,15 +51,12 @@ public class Data {
 		this.types = tipovi;
 	}
 
-
-	public HashMap<String, Agent> getAgents() {
+	public HashMap<String, IAgent> getAgents() {
 		return agents;
 	}
 
-	public void setAgents(HashMap<String, Agent> agenti) {
+	public void setAgents(HashMap<String, IAgent> agenti) {
 		this.agents = agenti;
 	}
-	
-	
-	
+
 }

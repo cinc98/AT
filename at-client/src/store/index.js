@@ -5,7 +5,8 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    activeAgents:[]
+    activeAgents:[],
+    messages:[]
   },
   mutations: {
     fetchActiveAgentsString(state, agents){
@@ -16,6 +17,10 @@ export default new Vuex.Store({
     fetchActiveAgents(state, agents){
       state.activeAgents.length = 0;
         state.activeAgents=agents;
+     
+    },
+    fetchMessages(state, m){
+        state.messages.push(JSON.parse(m));
      
     },
     

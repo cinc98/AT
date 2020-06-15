@@ -161,7 +161,7 @@ public class NodeRest {
 	@POST
 	@Path("/agents/running")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response loggedIn(HashMap<String, Agent> runningAgents) {
+	public Response loggedIn(HashMap<String, IAgent> runningAgents) {
 		System.out.println("Sada sam u novom ne-masteru i dobijam spisak pokrenutih agenata");
 		if (database.getAgents().size() == 0) {
 			database.setAgents(runningAgents);			

@@ -28,4 +28,15 @@ public class Agent implements IAgent {
 
 	}
 
+	@Override
+	public void init(AID aid) {
+		this.id = aid;
+		
+	}
+	
+	@Override
+	public AID getAid(){
+		return id;
+	}
+
 }

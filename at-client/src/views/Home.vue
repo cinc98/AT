@@ -26,6 +26,9 @@ export default {
   methods: {
     newAgent(agent) {
       this.$store.commit("fetchActiveAgentsString", agent);
+    },
+    newMessage(m) {
+      this.$store.commit("fetchMessages", m);
     }
   },
   created() {
@@ -35,7 +38,11 @@ export default {
       console.log(event);
     };
     this.socket.onmessage = function(event) {
-      vm.newAgent(event.data);
+      if (JSON.parse(event.data).performative === undefined) {
+        vm.newAgent(event.data);
+      } else {
+        vm.newMessage(event.data);
+      }
     };
   }
 };

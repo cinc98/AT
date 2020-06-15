@@ -2,19 +2,33 @@
   <div class="sendMessage">
     <v-card class="mx-auto cardSendMessage" max-width="400" raised>
       <v-subheader>MESSAGES</v-subheader>
-      <v-select :items="performatives" class="nameTextField" label="Performative"></v-select>
-      <v-select class="nameTextField" label="Sender"></v-select>
-      <v-select class="nameTextField" label="Receiver"></v-select>
-      <v-select class="nameTextField" label="Reply to"></v-select>
-      <v-text-field class="nameTextField" label="Content"></v-text-field>
-      <v-text-field class="nameTextField" label="Language"></v-text-field>
-      <v-text-field class="nameTextField" label="Encoding"></v-text-field>
-      <v-text-field class="nameTextField" label="Ontology"></v-text-field>
-      <v-text-field class="nameTextField" label="Protocol"></v-text-field>
-      <v-text-field class="nameTextField" label="Conversation ID"></v-text-field>
-      <v-text-field class="nameTextField" label="Reply with"></v-text-field>
-      <v-text-field class="nameTextField" label="Reply by"></v-text-field>
-      <v-btn class="nameTextField" color="blue darken-2 white--text">Send message</v-btn>
+      <v-select
+        :items="performatives"
+        v-model="performative"
+        class="nameTextField"
+        label="Performative"
+      ></v-select>
+      <v-select
+        v-model="sender"
+        :items="agents"
+        :item-text="item => item.id.type.name + '@' + item.id.name"
+        class="nameTextField"
+        label="Sender"
+      ></v-select>
+      <v-select
+        v-model="selectedReceivers"
+        :item-text="item => item.id.type.name + '@' + item.id.name"
+        :items="agents"
+        class="nameTextField"
+        label="Receivers"
+        multiple
+      ></v-select>
+      <v-text-field v-model="content" class="nameTextField" label="Content"></v-text-field>
+      <v-btn
+        class="nameTextField"
+        @click="sendMessage"
+        color="blue darken-2 white--text"
+      >Send message</v-btn>
     </v-card>
   </div>
 </template>
@@ -26,8 +40,54 @@ export default {
   name: "SendMessage",
   data() {
     return {
-      performatives: []
+      performatives: [],
+      performative: "",
+      sender: "",
+      selectedReceivers: [],
+      content: ""
     };
+  },
+  methods: {
+    sendMessage() {
+      axios
+        .post(`http://localhost:8080/ATProjectWAR/rest/messages`, {
+          performative: this.performative,
+          sender: {
+            name: this.sender.split("@")[1],
+            type: {
+              name: this.sender.split("@")[0]
+            }
+          },
+          content: this.content,
+          receivers: this.receivers()
+        })
+        .then(response => {
+          this.performative = "";
+          this.sender = "";
+          this.content = "";
+          this.selectedReceivers = [];
+        })
+        .catch(error => {
+          alert(error);
+        });
+    },
+    receivers() {
+      var r = [];
+      this.selectedReceivers.forEach(sr => {
+        r.push({
+          name: sr.split("@")[1],
+          type: {
+            name: sr.split("@")[0]
+          }
+        });
+      });
+      return r;
+    }
+  },
+  computed: {
+    agents() {
+      return this.$store.state.activeAgents;
+    }
   },
   created() {
     axios
@@ -47,8 +107,8 @@ export default {
   width: 100%;
 }
 .cardSendMessage {
-  height: calc(100% - 30px);
   margin-top: 15px;
+  padding-bottom: 15px;
   overflow: auto;
 }
 .nameTextField {

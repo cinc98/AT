@@ -16,6 +16,9 @@ import java.util.List;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -34,6 +37,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
+import agents.Ping;
+import agents.Pong;
 import jms.JMSQueue;
 import model.ACLPoruka;
 import model.AID;
@@ -59,13 +64,13 @@ public class Rest {
 	@GET
 	@Path("/search/{year_from}/{year_to}/{priceFrom}/{priceTo}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String search(@PathParam(value = "year_from") String year_from,
-			@PathParam(value = "year_to") String year_to, @PathParam(value = "priceFrom") String p1,
-			@PathParam(value = "priceTo") String p2) throws IOException, InterruptedException {
+	public String search(@PathParam(value = "year_from") String year_from, @PathParam(value = "year_to") String year_to,
+			@PathParam(value = "priceFrom") String p1, @PathParam(value = "priceTo") String p2)
+			throws IOException, InterruptedException {
 		Spyder spider = new Spyder();
-		
+
 		List<Car> prices = new ArrayList<Car>();
-		prices = spider.search(year_from,year_to,p1,p2);
+		prices = spider.search(year_from, year_to, p1, p2);
 		System.out.println("Ende" + prices);
 		ObjectMapper mapper = new ObjectMapper();
 		String msg = null;
@@ -81,56 +86,54 @@ public class Rest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		try (PrintWriter out = new PrintWriter(System.getProperty("user.dir")+"data.json")) {
-		    out.println(msg);
+		try (PrintWriter out = new PrintWriter(System.getProperty("user.dir") + "data.json")) {
+			out.println(msg);
 		}
-		    
+
 		return msg;
 	}
-	
+
 	@GET
 	@Path("/predict/{year}/{km}/{power}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String predict(@PathParam(value = "year") String year,
-			@PathParam(value = "km") String km, @PathParam(value = "power") String power) {
+	public String predict(@PathParam(value = "year") String year, @PathParam(value = "km") String km,
+			@PathParam(value = "power") String power) {
 		String s = null;
 		String predict = "";
-        try {
-            
-        	String command = "python C:\\Users\\HP\\Desktop\\Fakultet\\AT\\AT\\predict.py "+year + " " + km + " " + power;
-    		Process p = Runtime.getRuntime().exec(command);
-    		
-            BufferedReader stdInput = new BufferedReader(new 
-                 InputStreamReader(p.getInputStream()));
+		try {
 
-            BufferedReader stdError = new BufferedReader(new 
-                 InputStreamReader(p.getErrorStream()));
+			String command = "python C:\\Users\\HP\\Desktop\\Fakultet\\AT\\AT\\predict.py " + year + " " + km + " "
+					+ power;
+			Process p = Runtime.getRuntime().exec(command);
 
-            // read the output from the command
-            //System.out.println("Here is the standard output of the command:\n");
-            
-            while ((s = stdInput.readLine()) != null) {
-                //System.out.println(s);
-            	predict = s;
-            }
-            System.out.println("Vasa cena je : " + predict);
-            
-            // read any errors from the attempted command
-            //System.out.println("Here is the standard error of the command (if any):\n");
-            while ((s = stdError.readLine()) != null) {
-                System.out.println(s);
-            }
-            
-        }
-        catch (IOException e) {
-            System.out.println("exception happened - here's what I know: ");
-            e.printStackTrace();
-            System.exit(-1);
-        }
-		
+			BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+
+			// read the output from the command
+			// System.out.println("Here is the standard output of the command:\n");
+
+			while ((s = stdInput.readLine()) != null) {
+				// System.out.println(s);
+				predict = s;
+			}
+			System.out.println("Vasa cena je : " + predict);
+
+			// read any errors from the attempted command
+			// System.out.println("Here is the standard error of the command (if any):\n");
+			while ((s = stdError.readLine()) != null) {
+				System.out.println(s);
+			}
+
+		} catch (IOException e) {
+			System.out.println("exception happened - here's what I know: ");
+			e.printStackTrace();
+			System.exit(-1);
+		}
+
 		return predict;
 	}
-	
+
 	// GET/messages – dobavi listu performativa
 	@GET
 	@Path("/messages")
@@ -164,7 +167,7 @@ public class Rest {
 	@GET
 	@Path("/agents/running")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ArrayList<Agent> getAgents() {
+	public ArrayList<IAgent> getAgents() {
 
 		return new ArrayList<>(database.getAgents().values());
 	}
@@ -174,11 +177,11 @@ public class Rest {
 	@Path("/agents/running/{aid}")
 	public void stopAgent(@PathParam("aid") String aid) {
 		System.out.println("Treba da obrisem " + aid);
-		HashMap<String, Agent> agenti = database.getAgents();
-		HashMap<String, Agent> temp = new HashMap();
+		HashMap<String, IAgent> agenti = database.getAgents();
+		HashMap<String, IAgent> temp = new HashMap();
 		for (String a : agenti.keySet()) {
 			// System.out.println(agenti.get(a).getId().getHost().getAddress());
-			if (!agenti.get(a).getId().getHost().getAddress().contains(aid)) {
+			if (!agenti.get(a).getAid().getHost().getAddress().contains(aid)) {
 				temp.put(a, agenti.get(a));
 			}
 		}
@@ -236,34 +239,57 @@ public class Rest {
 		currentIp = currentIp.substring(2, currentIp.length() - 2);
 		AgentskiCentar host = new AgentskiCentar("8080", currentIp);
 
-		AID aid = new AID(name, host, new AgentType(type, null));
-		Agent agent = new Agent(aid);
-		database.getAgents().put(aid.getName(), agent);
-		ObjectMapper mapper = new ObjectMapper();
-		String msg = null;
 		try {
-			msg = mapper.writeValueAsString(database.getAgents().values());
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		ws.echoTextMessage(msg);
+			Context context = new InitialContext();
+			switch (type) {
+			case "Ping":
+				Ping ping = new Ping();
+				AID a = new AID(name, host, new AgentType(type,null));
+				ping.setId(a);
+				database.getAgents().put(ping.getAid().getName(), ping);
+				break;
+			case "Pong":
+				Pong pong = new Pong();
+				AID a1 = new AID(name, host, new AgentType(type,null));
+				pong.setId(a1);
+				database.getAgents().put(pong.getAid().getName(), pong);
+				break;
 
-		for (AgentskiCentar at : database.getAgentskiCentri()) {
-			if (at.getAddress().equals(currentIp))
-				continue;
-			ResteasyClient client2 = new ResteasyClientBuilder().build();
-			ResteasyWebTarget rtarget2 = client2.target(at.getAddress() + "/ATProjectWAR/rest/node/agents/running");
-			System.out.println(database.getAgents());
-			Response response2 = rtarget2.request(MediaType.APPLICATION_JSON)
-					.post(Entity.entity(database.getAgents(), MediaType.APPLICATION_JSON));
+			default:
+				break;
+			}
+			
+			ObjectMapper mapper = new ObjectMapper();
+			String msg = null;
+			try {
+				msg = mapper.writeValueAsString(database.getAgents().values());
+			} catch (JsonGenerationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (JsonMappingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			ws.echoTextMessage(msg);
+
+			for (AgentskiCentar at : database.getAgentskiCentri()) {
+				if (at.getAddress().equals(currentIp))
+					continue;
+				ResteasyClient client2 = new ResteasyClientBuilder().build();
+				ResteasyWebTarget rtarget2 = client2.target(at.getAddress() + "/ATProjectWAR/rest/node/agents/running");
+				System.out.println(database.getAgents());
+				Response response2 = rtarget2.request(MediaType.APPLICATION_JSON)
+						.post(Entity.entity(database.getAgents(), MediaType.APPLICATION_JSON));
+
+			}
+		} catch (NamingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
+
 	}
 
 }

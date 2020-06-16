@@ -114,8 +114,33 @@ public class Rest {
 		String content = year +"-" +km +"-" +power;
 		aclPoruka.setContent(content);
 		new JMSQueue(aclPoruka);
+		BufferedReader br = null;
+		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
+		String line = "";
+		String msg = "";
 
-		return null;
+		try {
+			br = new BufferedReader(new FileReader(System.getProperty("user.dir") + "\\predict.txt"));
+
+			StringBuilder sb = new StringBuilder();
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				try {
+					line = br.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			msg = sb.toString();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		
+		return msg;
 	}
 
 	// GET/messages – dobavi listu performativa

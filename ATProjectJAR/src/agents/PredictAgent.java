@@ -26,7 +26,7 @@ public class PredictAgent extends Agent {
 			String predict = "";
 			try {
 
-				String command = "python C:\\Users\\ivanc\\OneDrive\\Desktop\\AT\\predict.py " + poruka.getContent().split("-")[0] + " " + poruka.getContent().split("-")[1] + " "
+				String command = "python C:\\Users\\HP\\Desktop\\Fakultet\\AT\\AT\\predict.py " + poruka.getContent().split("-")[0] + " " + poruka.getContent().split("-")[1] + " "
 						+ poruka.getContent().split("-")[2];
 				Process p = Runtime.getRuntime().exec(command);
 
@@ -43,8 +43,6 @@ public class PredictAgent extends Agent {
 				}
 				System.out.println("Vasa cena je : " + predict);
 
-				// read any errors from the attempted command
-				// System.out.println("Here is the standard error of the command (if any):\n");
 				while ((s = stdError.readLine()) != null) {
 					System.out.println(s);
 				}
@@ -54,7 +52,7 @@ public class PredictAgent extends Agent {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-
+			
 			ACLPoruka aclPoruka = new ACLPoruka();
 			aclPoruka.setReceivers(new AID[] { database.agenti.get(2).getId() });
 			aclPoruka.setConversationId(poruka.getConversationId());

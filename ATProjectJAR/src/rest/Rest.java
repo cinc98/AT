@@ -67,29 +67,39 @@ public class Rest {
 	public String search(@PathParam(value = "year_from") String year_from, @PathParam(value = "year_to") String year_to,
 			@PathParam(value = "priceFrom") String p1, @PathParam(value = "priceTo") String p2)
 			throws IOException, InterruptedException {
-		Spyder spider = new Spyder();
 
-		List<Car> prices = new ArrayList<Car>();
-		prices = spider.search(year_from, year_to, p1, p2);
-		System.out.println("Ende" + prices);
-		ObjectMapper mapper = new ObjectMapper();
-		String msg = null;
+		ACLPoruka aclPoruka = new ACLPoruka();
+		aclPoruka.setReceivers(new AID[] { database.agenti.get(0).getId() });
+		aclPoruka.setPerformative(Performative.SEARCH);
+		String content = year_from +"-" +year_to +"-" +p1 +"-" +p2;
+		aclPoruka.setContent(content);
+		new JMSQueue(aclPoruka);
+		BufferedReader br = null;
+		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
+		String line = "";
+		String msg = "";
+
 		try {
-			msg = mapper.writeValueAsString(prices);
-		} catch (JsonGenerationException e) {
+			br = new BufferedReader(new FileReader(System.getProperty("user.dir") + "\\data.json"));
+
+			StringBuilder sb = new StringBuilder();
+			while (line != null) {
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				try {
+					line = br.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			msg = sb.toString();
+		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try (PrintWriter out = new PrintWriter(System.getProperty("user.dir") + "data.json")) {
-			out.println(msg);
+			e1.printStackTrace();
 		}
 
+		
 		return msg;
 	}
 
@@ -98,40 +108,14 @@ public class Rest {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String predict(@PathParam(value = "year") String year, @PathParam(value = "km") String km,
 			@PathParam(value = "power") String power) {
-		String s = null;
-		String predict = "";
-		try {
+		ACLPoruka aclPoruka = new ACLPoruka();
+		aclPoruka.setReceivers(new AID[] { database.agenti.get(1).getId() });
+		aclPoruka.setPerformative(Performative.PREDICT);
+		String content = year +"-" +km +"-" +power;
+		aclPoruka.setContent(content);
+		new JMSQueue(aclPoruka);
 
-			String command = "python C:\\Users\\HP\\Desktop\\Fakultet\\AT\\AT\\predict.py " + year + " " + km + " "
-					+ power;
-			Process p = Runtime.getRuntime().exec(command);
-
-			BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-			BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-			// read the output from the command
-			// System.out.println("Here is the standard output of the command:\n");
-
-			while ((s = stdInput.readLine()) != null) {
-				// System.out.println(s);
-				predict = s;
-			}
-			System.out.println("Vasa cena je : " + predict);
-
-			// read any errors from the attempted command
-			// System.out.println("Here is the standard error of the command (if any):\n");
-			while ((s = stdError.readLine()) != null) {
-				System.out.println(s);
-			}
-
-		} catch (IOException e) {
-			System.out.println("exception happened - here's what I know: ");
-			e.printStackTrace();
-			System.exit(-1);
-		}
-
-		return predict;
+		return null;
 	}
 
 	// GET/messages – dobavi listu performativa

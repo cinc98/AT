@@ -15,12 +15,12 @@ predikcija prikaze korisniku. Komunikacija do predictAgenta i do mastera ide pre
 • PUT /agents/running/{type}/{name} – pokreni agenta određenog tipa sa zadatim imenom\
 • DELETE /agents/running/{aid} – zaustavi određenog agenta\
 • POST /messages – pošalji ACL poruku\
-• GET /messages – dobavi listu performativa\
+• GET /messages – dobavi listu performativa
 
 --- KLIJENT SERVER DODATNE FUNKCIONALNOSTI ---\
 
 • GET /search/{year_from}/{year_to}/{priceFrom}/{priceTo} – dobavi podatke sa sajta polovniautomobili.com\
-• GET /predict/{year}/{km}/{power} – izvrsi predikciju cene na osnovu prosledjenih parametara\
+• GET /predict/{year}/{km}/{power} – izvrsi predikciju cene na osnovu prosledjenih parametara
 
 --- OSNOVNE SERVER SERVER FUNKCIONALNOSTI ---\
 
@@ -33,4 +33,4 @@ predikcija prikaze korisniku. Komunikacija do predictAgenta i do mastera ide pre
 • POST /agents/running – Master čvor dostavlja spisak pokrenutih agenata novom ne-master čvoru\
 • GET /node – Heartbeat protokol\
 • DELETE /node/{alias} – Master čvor javlja ostalim ne-master čvorovima da obrišu čvor koji nije uspeo da odgovori na prethodni 
-zahtev dva puta\
+zahtev dva puta

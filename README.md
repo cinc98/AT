@@ -1,7 +1,7 @@
 # AT
---- DEFAULTNI ZADATAK ---
+--- DEFAULTNI ZADATAK ---\\
 • Korisnik unosi podatke pretrage ( cenu od-do i godiste od-do). Podatci se salju agentu sakupljacu putem JMS-a koji pronalazi 
-automobile koji odgovaraju zadatim parametrima pretrage.
+automobile koji odgovaraju zadatim parametrima pretrage.\\
 • Korisnik zatim ima mogucnost da unese nove parametre ( godiste, kilometrazu i snagu) koji se salju agentu koji ce da istrenira 
 LinearRegression model i odradi predikciju cene na ovnovu datih parametara. Predikcija se salje masteru koji omogucava da se 
 predikcija prikaze korisniku. Komunikacija do predictAgenta i do mastera ide preko JMS-a.

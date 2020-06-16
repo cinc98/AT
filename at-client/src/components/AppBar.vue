@@ -2,7 +2,7 @@
     <v-app-bar class="appBar"
     color="blue darken-2 white--text">
       <router-link to="/" tag="v-toolbar-title">AGENT SYSTEM</router-link>
-
+      <router-link class="carP" to="/predict" tag="v-toolbar-title">car predict</router-link>
     </v-app-bar>
 </template>
 
@@ -21,5 +21,8 @@ export default {
     position: fixed;
     top: 0;
     width: 100%;
+}
+.carP{
+    margin-left: 20px;
 }
 </style>

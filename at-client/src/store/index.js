@@ -6,7 +6,8 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     activeAgents:[],
-    messages:[]
+    messages:[],
+    cars:[]
   },
   mutations: {
     fetchActiveAgentsString(state, agents){
@@ -17,6 +18,11 @@ export default new Vuex.Store({
     fetchActiveAgents(state, agents){
       state.activeAgents.length = 0;
         state.activeAgents=agents;
+     
+    },
+    fetchCars(state, cars){
+      state.cars.length = 0;
+        state.cars=cars;
      
     },
     fetchMessages(state, m){

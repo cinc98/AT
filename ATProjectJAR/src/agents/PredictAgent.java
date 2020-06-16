@@ -26,7 +26,7 @@ public class PredictAgent extends Agent {
 			String predict = "";
 			try {
 
-				String command = "python C:\\Users\\HP\\Desktop\\Fakultet\\AT\\AT\\predict.py " + poruka.getContent().split("-")[0] + " " + poruka.getContent().split("-")[1] + " "
+				String command = "py C:\\Users\\ivanc\\OneDrive\\Desktop\\AT\\predict.py " + poruka.getContent().split("-")[0] + " " + poruka.getContent().split("-")[1] + " "
 						+ poruka.getContent().split("-")[2];
 				Process p = Runtime.getRuntime().exec(command);
 

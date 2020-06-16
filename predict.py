@@ -5,7 +5,7 @@ import numpy as np
    
 if __name__ == '__main__':
     
-    with open(r'C:\Users\HP\wildfly-11.0.0.Final\bin\data.json') as json_file:
+    with open(r'C:\Users\ivanc\OneDrive\Documents\wildfly-11.0.0.Final\bin\data.json') as json_file:
         data = json.load(json_file)
     data = np.array(data)
     

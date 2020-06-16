@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJB;
 import javax.ejb.LocalBean;
@@ -74,6 +75,8 @@ public class Rest {
 		String content = year_from +"-" +year_to +"-" +p1 +"-" +p2;
 		aclPoruka.setContent(content);
 		new JMSQueue(aclPoruka);
+		TimeUnit.SECONDS.sleep(4);
+		
 		BufferedReader br = null;
 		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
 		String line = "";
@@ -107,13 +110,16 @@ public class Rest {
 	@Path("/predict/{year}/{km}/{power}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String predict(@PathParam(value = "year") String year, @PathParam(value = "km") String km,
-			@PathParam(value = "power") String power) {
+			@PathParam(value = "power") String power) throws InterruptedException {
 		ACLPoruka aclPoruka = new ACLPoruka();
 		aclPoruka.setReceivers(new AID[] { database.agenti.get(1).getId() });
 		aclPoruka.setPerformative(Performative.PREDICT);
 		String content = year +"-" +km +"-" +power;
 		aclPoruka.setContent(content);
 		new JMSQueue(aclPoruka);
+		System.out.println('a');
+		TimeUnit.SECONDS.sleep(3);
+		System.out.println('t');
 		BufferedReader br = null;
 		java.nio.file.Path p = Paths.get(".").toAbsolutePath().normalize();
 		String line = "";

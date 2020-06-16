@@ -1,5 +1,6 @@
 package agents;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,6 +23,7 @@ public class Collector extends Agent {
 	private List<Car> prices = new ArrayList<Car>();
 
 	public ArrayList<Car> search(String year_from, String year_to, String p1, String p2) {
+		prices.clear();
 		int i = 1;
 		while (i < 3) {
 			String currentUrl = "https://www.polovniautomobili.com/auto-oglasi/pretraga??page=" + i + "&year_from="
@@ -62,6 +64,7 @@ public class Collector extends Agent {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
 			try (PrintWriter out = new PrintWriter(System.getProperty("user.dir") + "\\data.json")) {
 				out.println(msg);
 			} catch (FileNotFoundException e) {
